@@ -64,15 +64,22 @@ succeeds has demonstrably produced a signed APK.
 2. Bump `versionCode` (must strictly increase) and `versionName` in `app/build.gradle`.
 3. Commit and push — the workflow rebuilds and re-signs automatically.
 
-## Building locally (optional)
+## Building locally
 
-Needs JDK 17 and an Android SDK with platform 35.
+A private toolchain is installed at `D:	k-toolchain` (JDK 21, Gradle 8.10.2, Android
+SDK platform 35 + build-tools 35.0.0). It is not on the system PATH and does not touch
+any existing Java install. One command does everything:
 
 ```
-export KEYSTORE_PATH=/path/to/release.keystore
-export STORE_PASSWORD=... KEY_ALIAS=cict KEY_PASSWORD=...
-gradle assembleRelease bundleRelease
+./build-release.sh
 ```
+
+That builds, verifies both signatures, and stages the artifacts into
+`D:\Tolkappiyam appelease\` with a `SHA256SUMS.txt`.
+
+`local.properties` (git-ignored) points Gradle at the SDK. Note it must use **forward
+slashes** — `.properties` files treat backslash as an escape, so `D:	k-toolchain`
+silently becomes `D:<TAB>k-toolchain`.
 
 Release tasks abort with a clear message if signing is not configured, so an unsigned
 artifact can never be mistaken for a shippable one.

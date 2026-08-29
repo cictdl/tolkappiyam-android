@@ -27,6 +27,11 @@ android {
                 storePassword System.getenv("STORE_PASSWORD")
                 keyAlias System.getenv("KEY_ALIAS")
                 keyPassword System.getenv("KEY_PASSWORD") ?: System.getenv("STORE_PASSWORD")
+                // v1 is unnecessary at minSdk 24; v3 is what lets the signing key be
+                // rotated later without breaking updates, so opt in explicitly.
+                enableV1Signing false
+                enableV2Signing true
+                enableV3Signing true
             }
         }
     }
@@ -52,6 +57,12 @@ android {
 }
 
 dependencies {
+    // Transitive deps disagree about the Kotlin stdlib: one pulls kotlin-stdlib 1.8.22,
+    // another the legacy kotlin-stdlib-jdk7/jdk8 1.6.21. Those JDK artifacts were folded
+    // into the main stdlib in Kotlin 1.8, so mixing versions duplicates classes and the
+    // dex step fails. The BOM pins them all to one version.
+    implementation platform("org.jetbrains.kotlin:kotlin-bom:1.8.22")
+
     implementation "androidx.appcompat:appcompat:1.7.0"
     implementation "androidx.webkit:webkit:1.12.1"
 }
