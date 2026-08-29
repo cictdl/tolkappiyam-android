@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- theme_color / background_color from manifest.webmanifest -->
+    <color name="brand_ink">#12203C</color>
+    <color name="paper">#F6F0E1</color>
+    <color name="paper_dark">#13151B</color>
+</resources>

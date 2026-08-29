@@ -1,0 +1,68 @@
+plugins {
+    id "com.android.application"
+}
+
+// Release signing is driven entirely by environment variables so that no secret
+// ever lives in the repository. On CI these come from GitHub Actions secrets;
+// locally you can export them before running gradle.
+def storeFilePath = System.getenv("KEYSTORE_PATH") ?: "release.keystore"
+def hasSigningConfig = file(storeFilePath).exists() && System.getenv("STORE_PASSWORD") != null
+
+android {
+    namespace "com.cict.tolkappiyam"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.cict.tolkappiyam"
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName "1.0"
+    }
+
+    signingConfigs {
+        release {
+            if (hasSigningConfig) {
+                storeFile file(storeFilePath)
+                storePassword System.getenv("STORE_PASSWORD")
+                keyAlias System.getenv("KEY_ALIAS")
+                keyPassword System.getenv("KEY_PASSWORD") ?: System.getenv("STORE_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig hasSigningConfig ? signingConfigs.release : null
+            // The app is a WebView shell: there is no Java worth shrinking, and
+            // shrinking cannot touch the assets that dominate the download size.
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation "androidx.appcompat:appcompat:1.7.0"
+    implementation "androidx.webkit:webkit:1.12.1"
+}
+
+// Fail the release build loudly rather than silently shipping an unsigned APK.
+tasks.matching { it.name in ["assembleRelease", "bundleRelease"] }.configureEach {
+    doFirst {
+        if (!hasSigningConfig) {
+            throw new GradleException(
+                "Release signing is not configured. Set KEYSTORE_PATH (or place " +
+                "release.keystore in app/) plus STORE_PASSWORD / KEY_ALIAS / KEY_PASSWORD.")
+        }
+    }
+}

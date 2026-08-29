@@ -1,0 +1,73 @@
+name: Build Android (APK + AAB)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # The project has no Gradle wrapper checked in (a wrapper jar is an opaque
+      # binary in the repo); the action installs a pinned Gradle instead.
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+
+      - name: Decode keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::KEYSTORE_BASE64 secret is not set — cannot produce a signed build."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | tr -d '\n' | base64 -d > "$RUNNER_TEMP/release.keystore"
+          ls -l "$RUNNER_TEMP/release.keystore"
+
+      - name: Build signed APK + AAB
+        env:
+          KEYSTORE_PATH: ${{ runner.temp }}/release.keystore
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: gradle assembleRelease bundleRelease --no-daemon --stacktrace
+
+      - name: Verify the APK really is signed
+        run: |
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          "$BT/apksigner" verify --print-certs --verbose \
+            app/build/outputs/apk/release/app-release.apk
+
+      - name: Remove keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.keystore"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: tolkappiyam-apk
+          path: app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: tolkappiyam-aab
+          path: app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error

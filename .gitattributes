@@ -1,0 +1,5 @@
+# The CI runner is Linux; keep build inputs LF regardless of the authoring OS.
+* text=auto eol=lf
+*.png binary
+*.jks binary
+*.keystore binary

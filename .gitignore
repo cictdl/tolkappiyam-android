@@ -1,0 +1,12 @@
+# Never commit signing material.
+*.keystore
+*.jks
+*.b64.txt
+keystore/
+
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+.DS_Store
