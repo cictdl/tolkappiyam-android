@@ -58,6 +58,48 @@ Download from the finished run:
 The workflow runs `apksigner verify --print-certs` before uploading, so a build that
 succeeds has demonstrably produced a signed APK.
 
+## App-only chrome
+
+The APK ships a *modified* copy of the portal: `index.html` additionally loads
+`android.css` and `android.js`. The web edition is untouched.
+
+The web masthead is 529px tall on a 375px phone and the hero adds 427px more, so 70%
+of the first screen was chrome before a line of Tolkappiyam appeared. In a standalone
+app most of that is redundant — the launcher icon and app name already say whose app
+this is. The two files:
+
+- collapse the masthead into a 52px app bar (menu · logo · title · language);
+- **move** — never delete — the Government of India / Ministry of Education strip and
+  the full institution identity into the drawer, where they stay one tap away;
+- put the corpus counts on one scrollable row on the landing view;
+- retire the hero quote once the reader navigates, so pages start at the content;
+- follow the device dark mode, using the dark palette the portal already defines but
+  never activates;
+- disable the service worker (see below).
+
+Result: content starts at 7% of the screen when reading, down from 70%.
+
+### Why the service worker is disabled in the app
+
+`sw.js` is cache-first over `tk-portal-v1`. On the web that is what makes the portal
+work offline. Inside the APK every asset is already local, so it buys nothing — and its
+cache lives in the WebView data directory, which **survives an app update**. Ship a new
+portal in a new APK and the stale cache keeps serving the old one. This was observed,
+not theorised: the first UI rebuild rendered the old masthead until the cache was
+cleared. `android.js` unregisters it and blocks re-registration.
+
+### Updating the bundled portal
+
+Do **not** copy `index.html` over by hand — that silently drops the two chrome tags and
+the old masthead returns. Use:
+
+```
+python tools/sync-www.py [path-to-portal-index.html]
+```
+
+It copies the portal and re-injects the tags. `android.css` / `android.js` are app-only
+and are never overwritten.
+
 ## Releasing a new version
 
 1. Replace `app/src/main/assets/www/index.html` with the new portal build.
@@ -75,7 +117,8 @@ any existing Java install. One command does everything:
 ```
 
 That builds, verifies both signatures, and stages the artifacts into
-`D:\Tolkappiyam appelease\` with a `SHA256SUMS.txt`.
+`D:\Tolkappiyam app
+elease\` with a `SHA256SUMS.txt`.
 
 `local.properties` (git-ignored) points Gradle at the SDK. Note it must use **forward
 slashes** — `.properties` files treat backslash as an escape, so `D:	k-toolchain`

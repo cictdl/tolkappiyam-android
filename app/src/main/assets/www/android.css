@@ -1,0 +1,130 @@
+/* ===========================================================================
+   android.css — app-only chrome. Loaded ONLY by the copy of the portal that
+   ships inside the Android APK; the web edition is untouched.
+
+   On a 375px-wide phone the web masthead is 529px tall and the hero quote adds
+   another 194px, so 70% of the first screen was chrome before a single line of
+   Tolkappiyam appeared. In a standalone app most of that masthead is redundant:
+   the launcher icon and app name already say whose app this is.
+
+   Nothing is deleted. The Government of India / Ministry of Education strip and
+   the full institution identity are MOVED into the drawer by android.js, where
+   they stay one tap away. The rules below hide them where they used to sit and
+   re-show them at their new home, so there is no flash of the old layout.
+   =========================================================================== */
+
+/* ---- 1. hide the pieces android.js relocates ---------------------------- */
+.gov-strip,
+.mast-in .mast-t,
+.mast-in .mast-right,
+header.mast .subbar { display: none !important; }
+
+/* ---- 2. the app bar ----------------------------------------------------- */
+header.mast {
+  position: sticky; top: 0; z-index: 60;
+  box-shadow: 0 1px 0 var(--line), 0 2px 10px rgba(20,15,5,.06);
+}
+header.mast .mast-in {
+  display: flex; align-items: center; gap: 10px;
+  min-height: 52px; padding: 5px 10px; max-width: none;
+}
+header.mast .logo { height: 30px; }
+header.mast .menu-btn { font-size: 22px; line-height: 1; padding: 6px 4px; }
+
+/* The institution names moved to the drawer, so the bar needs its own title.
+   One line, ellipsised — never allowed to wrap the bar to a second row. */
+.app-title {
+  flex: 1 1 auto; min-width: 0;
+  font-family: var(--serif); font-weight: 700; font-size: 17px;
+  color: var(--cictred); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+html[data-theme="dark"] .app-title { color: var(--ochre-soft); }
+
+/* Language toggle stays in the bar; it is a reading control, not branding. */
+header.mast #langBtn { flex: 0 0 auto; margin-left: auto; }
+
+/* The tricolour rule is 3px of national identity — cheap, so it stays. */
+header.mast .tricolour { display: block; }
+
+/* ---- 3. relocated blocks, restyled for the drawer ----------------------- */
+#side .app-ident {
+  padding: 14px 16px 12px; border-bottom: 1px solid var(--line);
+  background: var(--paper-card);
+}
+#side .app-ident .mast-t { display: block !important; line-height: 1.35; }
+#side .app-ident .mast-t .ta { font-size: 15px; }
+#side .app-ident .mast-t .en { font-size: 11.5px; margin-top: 2px; }
+#side .app-ident .mast-right {
+  display: flex !important; flex-wrap: wrap; gap: 8px; align-items: center;
+  margin-top: 10px;
+}
+
+#side .app-govfoot {
+  margin-top: auto; border-top: 1px solid var(--line);
+  background: var(--ink); color: #e9dfc4;
+}
+#side .app-govfoot .gov-strip { display: block !important; background: transparent; }
+#side .app-govfoot .gov-in {
+  display: block; padding: 10px 16px; font-size: 11px; line-height: 1.7;
+}
+#side .app-govfoot .gov-in .sep { display: none; }
+#side .app-govfoot .gov-in span { display: block; }
+#side .app-govfoot .gov-in .auto { margin-left: 0; }
+
+/* The drawer now has a header and a footer, so it must be a column that can
+   scroll in the middle rather than one long scrolling block. */
+#side { display: flex; flex-direction: column; }
+#side > .search-wrap { flex: 0 0 auto; }
+#side > #tree, #side > div:not(.app-ident):not(.app-govfoot):not(.search-wrap) {
+  flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+
+/* ---- 4. the corpus counts ---------------------------------------------- */
+/* Useful on arrival, pointless following you down every page — so they move
+   out of the sticky header and onto the home screen only. */
+.hero .subbar {
+  display: block !important; position: static;
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  margin-top: 14px;
+}
+.hero .subbar .subbar-in {
+  /* the portal wraps these five counts onto three lines at phone width;
+     one horizontally-scrollable row costs 21px instead of 71px */
+  display: flex; flex-wrap: nowrap; gap: 14px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  padding: 7px 14px; scrollbar-width: none;
+}
+.hero .subbar .subbar-in::-webkit-scrollbar { display: none; }
+.hero .subbar .subbar-in > * { flex: 0 0 auto; white-space: nowrap; }
+
+/* ---- 5. reclaim vertical space on the home screen ----------------------- */
+/* The hero is desktop-proportioned: 26px block padding and a 24px quote mark
+   are fine on a 1500px page and wasteful on a 375px phone. Same content,
+   phone-appropriate scale. */
+.hero { padding: 14px 16px 10px !important; }
+.hero-title { font-size: 19px !important; line-height: 1.3; }
+.hero-quote { font-size: 14.5px !important; padding: 10px 0 6px !important; line-height: 1.55; }
+.hero-quote .qm { font-size: 17px !important; }
+.hero-en { font-size: 13px !important; }
+.hero-quote cite { font-size: 11.5px !important; }
+.hero-quote, .hero-en { max-width: 100%; }
+
+/* ---- 6. touch targets --------------------------------------------------- */
+/* Android's accessibility guidance is a 48dp minimum; several of these controls
+   were sized for a mouse pointer. */
+header.mast .menu-btn,
+header.mast #langBtn,
+#side .app-ident .mast-right a,
+#side .app-ident .mast-right button { min-height: 44px; display: inline-flex; align-items: center; }
+
+/* ---- 7. app feel -------------------------------------------------------- */
+/* Long-press text selection and the blue tap flash both read as "web page". */
+body { -webkit-tap-highlight-color: transparent; overscroll-behavior-y: contain; }
+button, .menu-btn, .fitem, .head { -webkit-user-select: none; user-select: none; }
+/* but never disable selection on the text people came to read */
+#main, .verse, .line, .urai-block { -webkit-user-select: text; user-select: text; }
+
+/* ---- 8. retire the hero once reading starts ---------------------------- */
+/* Set by android.js on the first navigation. The landing view keeps its quote
+   and counts; every page after it starts at the content. */
+html.nav-started .hero { display: none !important; }
