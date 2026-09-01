@@ -4,4 +4,6 @@
     <color name="brand_ink">#12203C</color>
     <color name="paper">#F6F0E1</color>
     <color name="paper_dark">#13151B</color>
+    <!-- the launcher artwork sits on black; the adaptive background must match -->
+    <color name="icon_bg">#000000</color>
 </resources>

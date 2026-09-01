@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- The artwork fills the whole 108dp canvas; the launcher's mask crops it to the
+     central 66.7%, which lands on the statue and the CICT emblem. The background
+     matches the artwork's own black ground so every mask shape meets it cleanly. -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@color/brand_ink" />
-    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <background android:drawable="@color/icon_bg" />
+    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
 </adaptive-icon>

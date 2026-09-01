@@ -75,7 +75,10 @@
     if (mastIn && !qs('.app-title')) {
       var title = document.createElement('div');
       title.className = 'app-title';
-      title.textContent = (document.title || 'தொல்காப்பியம்').split(/[—|]/)[0].trim();
+      /* The app is published as தொல்காப்பிய நுண்ணறிவு, while <title> still names
+         the underlying portal edition. The bar shows the app name so it agrees
+         with the launcher label. Keep in step with app_name in strings.xml. */
+      title.textContent = 'தொல்காப்பிய நுண்ணறிவு';
       var logo = mastIn.querySelector('.logo');
       if (logo && logo.nextSibling) { mastIn.insertBefore(title, logo.nextSibling); }
       else { mastIn.appendChild(title); }
