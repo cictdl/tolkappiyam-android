@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tolkappiya Nuṇṇaṟivu Privacy Policy · CICT</title>
+<meta name="description" content="Privacy policy for the CICT Android application தொல்காப்பிய நுண்ணறிவு (com.cict.tolkappiyam).">
+<meta name="robots" content="index,follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600&family=Noto+Serif+Tamil:wght@500;600;700&family=Noto+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ground:#F6F0E1; --surface:#FCF9F1; --surface-2:#F1EAD8;
+    --ink:#12203C; --text:#23272F; --muted:#5C5648; --faint:#867D68;
+    --rule:rgba(40,30,10,.16); --rule-soft:rgba(40,30,10,.08);
+    --accent:#B5121B; --ochre:#8A5D1C; --good:#2F6F63;
+    --on-ink:#E9DFC4; --on-ink-dim:#B9AE90;
+    --serif:'Noto Serif Tamil',Georgia,serif;
+    --sans:'Noto Sans Tamil','Segoe UI',system-ui,sans-serif;
+    --mono:'Noto Sans Mono',ui-monospace,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#12151B; --surface:#1B1E24; --surface-2:#232730;
+      --ink:#E9E3D2; --text:#E4DECD; --muted:#A79E88; --faint:#8A8268;
+      --rule:rgba(220,200,150,.18); --rule-soft:rgba(220,200,150,.09);
+      --accent:#E8897C; --ochre:#D2A45E; --good:#5FA394;
+      --on-ink:#E9DFC4; --on-ink-dim:#B9AE90;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#12151B; --surface:#1B1E24; --surface-2:#232730;
+    --ink:#E9E3D2; --text:#E4DECD; --muted:#A79E88; --faint:#8A8268;
+    --rule:rgba(220,200,150,.18); --rule-soft:rgba(220,200,150,.09);
+    --accent:#E8897C; --ochre:#D2A45E; --good:#5FA394;
+    --on-ink:#E9DFC4; --on-ink-dim:#B9AE90;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--ground); color:var(--text);
+    font-family:var(--sans); font-size:16px; line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding:0 24px 88px}
+
+  /* ---- masthead ---- */
+  .mast{background:#12203C; color:var(--on-ink)}
+  .mast-in{max-width:760px; margin:0 auto; padding:30px 24px 26px}
+  .gov{font-size:11.5px; letter-spacing:.055em; text-transform:uppercase;
+       color:var(--on-ink-dim); display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+  .gov .dot{opacity:.45}
+  .mast h1{
+    font-family:var(--serif); font-weight:700; font-size:clamp(27px,5.2vw,38px);
+    line-height:1.22; margin:14px 0 4px; color:#fff; text-wrap:balance;
+  }
+  .mast .en{font-size:15px; color:var(--on-ink-dim); letter-spacing:.01em}
+  .mast .kind{
+    margin-top:18px; font-family:var(--mono); font-size:12px;
+    letter-spacing:.09em; text-transform:uppercase; color:#E3B872;
+  }
+  .tricolour{height:3px; display:flex}
+  .tricolour i{flex:1}
+  .tricolour i:nth-child(1){background:#FF9933}
+  .tricolour i:nth-child(2){background:#FFFFFF}
+  .tricolour i:nth-child(3){background:#138808}
+
+  /* ---- draft notice ---- */
+  .notice{
+    margin:26px 0 0; padding:15px 18px; background:var(--surface-2);
+    border-left:3px solid var(--accent); border-radius:0 4px 4px 0;
+    font-size:14.5px; color:var(--muted);
+  }
+  .notice strong{color:var(--text); font-weight:600}
+
+  /* ---- meta strip ---- */
+  .meta{
+    margin-top:26px; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:0;
+  }
+  .meta div{padding:13px 16px 13px 0}
+  .meta dt{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--faint); margin-bottom:3px;
+  }
+  .meta dd{margin:0; font-size:14px; color:var(--text); font-variant-numeric:tabular-nums}
+
+  /* ---- headline summary ---- */
+  .summary{
+    margin:38px 0 8px; padding:24px 26px; background:var(--surface);
+    border:1px solid var(--rule); border-radius:6px;
+  }
+  .summary p{margin:0; font-family:var(--serif); font-weight:500;
+    font-size:19px; line-height:1.55; color:var(--ink); text-wrap:balance}
+  .summary ul{margin:16px 0 0; padding:0; list-style:none;
+    display:flex; flex-direction:column; gap:7px}
+  .summary li{position:relative; padding-left:24px; font-size:15px; color:var(--muted)}
+  .summary li::before{
+    content:"—"; position:absolute; left:0; top:0; color:var(--good); font-weight:600;
+  }
+
+  /* ---- sections ---- */
+  section{margin-top:44px}
+  h2{
+    font-family:var(--serif); font-weight:600; font-size:21px; color:var(--ink);
+    margin:0 0 4px; padding-bottom:9px; border-bottom:1px solid var(--rule);
+    text-wrap:balance;
+  }
+  h3{font-family:var(--sans); font-weight:600; font-size:15.5px;
+     color:var(--text); margin:26px 0 6px}
+  p{margin:14px 0}
+  a{color:var(--accent); text-decoration-thickness:1px; text-underline-offset:2px}
+  a:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:2px}
+  ul.plain{margin:14px 0; padding-left:20px}
+  ul.plain li{margin:6px 0}
+  code{font-family:var(--mono); font-size:.88em; background:var(--surface-2);
+       padding:1px 5px; border-radius:3px}
+
+  /* ---- tables ---- */
+  .tw{overflow-x:auto; margin:20px 0; border:1px solid var(--rule); border-radius:6px}
+  table{border-collapse:collapse; width:100%; min-width:520px; font-size:14.5px}
+  th,td{text-align:left; padding:12px 15px; vertical-align:top;
+        border-bottom:1px solid var(--rule-soft)}
+  thead th{
+    background:var(--surface-2); font-family:var(--mono); font-weight:500;
+    font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--faint);
+    border-bottom:1px solid var(--rule);
+  }
+  tbody tr:last-child td{border-bottom:none}
+  td strong{font-weight:600; color:var(--ink)}
+  .when{color:var(--muted); font-size:13.5px}
+
+  .no-list{margin:14px 0; padding:0; list-style:none;
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:5px 18px}
+  .no-list li{position:relative; padding-left:22px; font-size:14.5px; color:var(--muted)}
+  .no-list li::before{content:"✕"; position:absolute; left:0; color:var(--faint); font-size:12px}
+
+  .contact{
+    margin-top:22px; padding:20px 22px; background:var(--surface);
+    border:1px solid var(--rule); border-radius:6px; font-size:15px;
+  }
+  .fill{background:rgba(181,18,27,.1); border-bottom:1px dashed var(--accent);
+        padding:0 4px; color:var(--accent); font-weight:600}
+  :root[data-theme="dark"] .fill,
+  :root:not([data-theme="light"]) .fill{background:rgba(232,137,124,.14)}
+
+  footer{margin-top:52px; padding-top:20px; border-top:1px solid var(--rule);
+         font-size:13px; color:var(--faint)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<header class="mast">
+  <div class="mast-in">
+    <div class="gov">
+      <span>भारत सरकार · Government of India</span><span class="dot">|</span>
+      <span>Ministry of Education</span>
+    </div>
+    <h1>தொல்காப்பிய நுண்ணறிவு</h1>
+    <div class="en">Tolkappiya Nuṇṇaṟivu — Android application</div>
+    <div class="kind">Privacy Policy</div>
+  </div>
+</header>
+<div class="tricolour"><i></i><i></i><i></i></div>
+
+<div class="wrap">
+
+  <div class="notice">
+    <strong>Draft for CICT approval.</strong> This policy was written from a technical audit
+    of the application's source, permissions and network behaviour. It is not legal advice.
+    Have CICT's competent authority review it, fill the marked contact details, and publish
+    it at a cict.in address before submitting the app to Google Play.
+  </div>
+
+  <dl class="meta">
+    <div><dt>Application</dt><dd>com.cict.tolkappiyam</dd></div>
+    <div><dt>Version</dt><dd>1.2 (build 3)</dd></div>
+    <div><dt>Effective</dt><dd>1 September 2026</dd></div>
+    <div><dt>Publisher</dt><dd>CICT, Chennai</dd></div>
+  </dl>
+
+  <div class="summary">
+    <p>This application does not collect personal information. There is no account, no
+    sign-in, no advertising and no analytics of any kind.</p>
+    <ul>
+      <li>The entire Tolkappiyam corpus is bundled inside the app and readable with no network connection.</li>
+      <li>What you save — reading position, bookmarks, progress, scores — stays on your device.</li>
+      <li>The app requests one permission, <code>INTERNET</code>, and nothing else.</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2>Who publishes this app</h2>
+    <p>The Central Institute of Classical Tamil (CICT) is an autonomous institution under the
+    Ministry of Education, Government of India, based in Chennai. CICT publishes
+    தொல்காப்பிய நுண்ணறிவு as a free scholarly and educational edition of the Tolkappiyam.</p>
+  </section>
+
+  <section>
+    <h2>Information we collect</h2>
+    <p><strong>None.</strong> The app has no registration, no login and no user profile. It does
+    not ask for your name, email address, phone number or any other identifier, and it contains
+    no advertising network, analytics library, crash-reporting service or tracking identifier.
+    Its only third-party software components are Google's AndroidX interface libraries, which
+    collect nothing.</p>
+    <p>The app does not request, and therefore cannot access:</p>
+    <ul class="no-list">
+      <li>Location</li><li>Camera</li><li>Microphone</li><li>Contacts</li>
+      <li>Photos or files</li><li>Call or SMS data</li><li>Calendar</li>
+      <li>Advertising ID</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>What the app stores on your device</h2>
+    <p>So that you can pick up where you left off, the app saves a small amount of information
+    in its own private storage area:</p>
+    <ul class="plain">
+      <li>the passage you were last reading;</li>
+      <li>bookmarks and any preferences you set;</li>
+      <li>your progress through the guided learning path, self-tests and word games.</li>
+    </ul>
+    <p>This information never identifies you, is never transmitted to CICT, and is readable
+    only by this app under Android's application sandbox. Uninstalling the app, or clearing its
+    data from Android Settings, erases it permanently.</p>
+  </section>
+
+  <section>
+    <h2>What leaves your device</h2>
+    <p>Three things, and only three. Each is listed with what it sends and when.</p>
+    <div class="tw">
+      <table>
+        <thead>
+          <tr><th>Destination</th><th>What is sent</th><th>When</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Google Fonts</strong><br><span class="when">fonts.googleapis.com, fonts.gstatic.com</span></td>
+            <td>Your device's IP address and basic browser information, as part of an ordinary
+                web request for typeface files. No app content and nothing you have saved is sent.
+                Handled under Google's own privacy policy.</td>
+            <td class="when">On launch, if the device is online. If it is offline the app uses the
+                fonts already built into Android and works normally.</td>
+          </tr>
+          <tr>
+            <td><strong>Websites you choose to open</strong><br><span class="when">CICT Digital Archives, Index of Sangam Corpus, and any share target you pick</span></td>
+            <td>Only what your browser or the app you share to normally sends. These open outside
+                this app, and the privacy policy of that site or app then applies.</td>
+            <td class="when">Only when you tap a link or use the share button.</td>
+          </tr>
+          <tr>
+            <td><strong>Your own Google Drive backup</strong><br><span class="when">Android Backup</span></td>
+            <td>Your saved reading position and progress, as part of Android's standard app
+                backup. This goes to your own Google Account, not to CICT, and we cannot read it.</td>
+            <td class="when">Only if you have Google backup switched on in Android Settings. You
+                can turn it off there.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Read-aloud (ஒலி)</h2>
+    <p>When you press the read-aloud button, the app passes the passage to the text-to-speech
+    engine installed on your device. Some engines synthesise speech entirely on the device;
+    others, including Google's, may send the text to their servers to generate audio. That
+    processing is governed by the policy of whichever engine you have installed, not by this
+    one. Nothing is read aloud, and no text is passed to any engine, unless you press the button.</p>
+  </section>
+
+  <section>
+    <h2>Children</h2>
+    <p>The app is intended for students and general readers and is suitable for all ages. Because
+    it collects no personal information, shows no advertising, contains no in-app purchases and
+    has no messaging, comment or user-content feature, it presents no route by which a child's
+    data could be gathered or a child could be contacted.</p>
+  </section>
+
+  <section>
+    <h2>Security and retention</h2>
+    <p>CICT holds no user data from this application, so there is nothing on our side to lose,
+    retain or disclose. The information saved on your device is protected by Android's
+    application sandbox and by whatever screen lock and encryption you have enabled. We retain
+    nothing, because we receive nothing.</p>
+  </section>
+
+  <section>
+    <h2>Your choices</h2>
+    <ul class="plain">
+      <li><strong>Erase everything the app has saved</strong> — Android Settings → Apps →
+      தொல்காப்பிய நுண்ணறிவு → Storage → Clear data, or simply uninstall.</li>
+      <li><strong>Stop the backup copy</strong> — turn off Google backup in Android Settings.</li>
+      <li><strong>Prevent the font request</strong> — use the app with the network off, or deny
+      it network access in Android Settings. All content remains available.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Changes to this policy</h2>
+    <p>If a future version of the app changes what it collects or transmits, this policy will be
+    updated and its effective date changed before that version is published. The current text is
+    always available at the address linked from the app's Google Play listing.</p>
+  </section>
+
+  <section>
+    <h2>Contact</h2>
+    <div class="contact">
+      <strong>Central Institute of Classical Tamil</strong><br>
+      <span class="fill">[postal address — to be filled by CICT]</span><br>
+      Chennai, Tamil Nadu, India<br><br>
+      Email: <span class="fill">[official contact address — to be filled by CICT]</span><br>
+      Web: <a href="https://www.cict.in">www.cict.in</a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Appendix — Google Play Data Safety</h2>
+    <p>Google Play requires a separate Data Safety declaration in the Play Console. Based on the
+    audit behind this policy, these are the answers that match the app's actual behaviour. CICT
+    should confirm them before submission.</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Question</th><th>Answer</th><th>Basis</th></tr></thead>
+        <tbody>
+          <tr><td>Does your app collect or share any of the required user data types?</td>
+              <td><strong>No</strong></td>
+              <td>No data is transmitted to CICT or any third party for collection. See the note below on Google Fonts.</td></tr>
+          <tr><td>Is all user data encrypted in transit?</td><td><strong>Yes</strong></td>
+              <td>The only outbound request is HTTPS.</td></tr>
+          <tr><td>Do you provide a way to request data deletion?</td><td><strong>Yes</strong></td>
+              <td>Clearing app data or uninstalling erases everything; nothing is held server-side.</td></tr>
+          <tr><td>Does the app contain ads?</td><td><strong>No</strong></td><td>No ad SDK is present.</td></tr>
+          <tr><td>Target audience</td><td><strong>All ages</strong></td>
+              <td>Educational content, no data collection, no purchases, no communication features.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>One point to settle before you submit</h3>
+    <p>The Google Fonts request sends the device IP address to Google. Google Play's Data Safety
+    rules generally treat data that is only used transiently to serve a request, and never
+    stored, as outside the "collection" declaration — which is why <em>No</em> is proposed above.
+    It is nevertheless a judgement call, and it is the only thing standing between this app and
+    an unambiguous answer.</p>
+    <p><strong>The cleaner course is to remove the request entirely.</strong> Android already
+    ships the Noto Tamil typefaces the app asks for, so dropping the Google Fonts link would
+    change almost nothing visually, would make the app make <em>no</em> automatic network
+    connection whatsoever, and would let both this policy and the Data Safety form say so without
+    qualification.</p>
+  </section>
+
+  <footer>
+    Central Institute of Classical Tamil · Ministry of Education, Government of India<br>
+    Policy drafted 1 September 2026 for application version 1.2 (build 3), package
+    <code>com.cict.tolkappiyam</code>.
+  </footer>
+</div>
+</body>
+</html>
