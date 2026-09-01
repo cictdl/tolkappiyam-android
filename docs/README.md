@@ -17,10 +17,8 @@ dependencies except the Google Fonts stylesheet and degrades cleanly without it.
 
 ## Before publishing
 
-1. Fill the two placeholders marked in red: the postal address and the official
-   contact email.
-2. Have CICT's competent authority approve the text. It was drafted from a
+1. Have CICT's competent authority approve the text. It was drafted from a
    technical audit of the app, not by a lawyer.
-3. Keep it in step with the app: if a release changes what is collected or
+2. Keep it in step with the app: if a release changes what is collected or
    transmitted, update the policy and its effective date **before** that release
    goes out. The current text describes version 1.2 (build 3).
