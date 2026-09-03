@@ -116,6 +116,32 @@
       }
     }
 
+    /* --- search out of the drawer, into the app bar ---------------------- */
+    /* On the web the sidebar is always on screen, so a search box inside it is
+       fine. On a phone the sidebar is a drawer over the page: you must open it
+       to reach the box, results render into #main behind it, and the scrim then
+       covers them — so a perfectly good search looks broken. Lift the box into
+       the header, where it is always reachable and never covers its own results. */
+    var searchWrap = qs('#side > .search-wrap') || qs('.search-wrap');
+    var mast = qs('header.mast');
+    if (searchWrap && mast) {
+      var tri = mast.querySelector('.tricolour');
+      if (tri && tri.nextSibling) { mast.insertBefore(searchWrap, tri.nextSibling); }
+      else { mast.appendChild(searchWrap); }
+    }
+
+    /* Belt and braces: if a search ever runs while the drawer is open, get the
+       drawer out of the way so the results are actually visible. */
+    var si = byId('search');
+    if (si) {
+      si.addEventListener('input', function () {
+        if (si.value.trim().length >= 2 && typeof closeSide === 'function') {
+          var sd = byId('side');
+          if (sd && sd.classList.contains('open')) { closeSide(); }
+        }
+      });
+    }
+
     /* --- corpus counts -> home screen, out of the sticky header ---------- */
     var subbar = qs('header.mast .subbar');
     var hero = qs('.hero');

@@ -128,3 +128,20 @@ button, .menu-btn, .fitem, .head { -webkit-user-select: none; user-select: none;
 /* Set by android.js on the first navigation. The landing view keeps its quote
    and counts; every page after it starts at the content. */
 html.nav-started .hero { display: none !important; }
+
+/* ---- 9. search lives in the app bar, not the drawer -------------------- */
+header.mast .search-wrap {
+  display: block; padding: 8px 10px 10px; border-top: 1px solid var(--line-soft);
+  background: var(--paper-card);
+}
+header.mast .search-wrap #search {
+  width: 100%; min-height: 42px; font-size: 15px; font-family: var(--sans);
+  padding: 9px 13px; border: 1px solid var(--line); border-radius: 9px;
+  background: var(--paper); color: var(--tx); -webkit-appearance: none; appearance: none;
+}
+header.mast .search-wrap #search:focus {
+  outline: none; border-color: var(--ochre);
+  box-shadow: 0 0 0 3px rgba(176,122,44,.16);
+}
+/* The hint duplicates the placeholder and costs a line of a phone screen. */
+header.mast .search-wrap #searchHint { display: none; }
