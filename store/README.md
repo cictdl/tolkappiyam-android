@@ -33,3 +33,20 @@ title and the CICT lockup are therefore cropped from the supplied artwork, where
 is already correctly rendered. Only the Latin strapline is live text, and the script
 bitmap-checks every glyph against a known-absent codepoint before drawing, because Ā, Ṇ
 and Ṟ are missing from several Windows faces and would otherwise ship as tofu boxes.
+
+## Recitation audio and நூற்பா cue sheets
+
+`app/src/main/assets/audio/` holds the 28 recordings (பாயிரம் + 27 இயல், 88 MB, 5.2 h)
+from kts.cict.in. They are per-இயல்; no per-நூற்பா timestamps exist, and automatic
+alignment was tried and rejected (pauses track the அடி, not the நூற்பா).
+
+`cues.json` maps a recording to verse start times — `{"012-col-kilaviyakkam": [[1, 30.2],
+[2, 60.2], …]}`, `mn` being the portal's 1-based நூற்பா index. It ships empty. To fill it:
+
+1. In the app, open an இயல், press ▶ இயல் ஒலி, then **குறி** on the player.
+2. As the reciter begins each நூற்பா, tap that நூற்பா's ▶. The count (e.g. 12/61) advances
+   and the card gets a teal outline; tap again to correct a time.
+3. Highlighting works on that device at once. Press **ஏற்றுமதி** to share the JSON
+   (WhatsApp, e-mail, Drive) and send it to the maintainer.
+4. Merge the received JSON into `cues.json` and rebuild. Highlighting is then exact for
+   every reader.

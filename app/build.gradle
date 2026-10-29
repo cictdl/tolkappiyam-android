@@ -16,8 +16,8 @@ android {
         applicationId "com.cict.tolkappiyam"
         minSdk 24
         targetSdk 37
-        versionCode 5
-        versionName "1.4"
+        versionCode 6
+        versionName "1.5"
     }
 
     signingConfigs {
@@ -48,6 +48,13 @@ android {
             applicationIdSuffix ".debug"
             versionNameSuffix "-debug"
         }
+    }
+
+    // 28 recitation MP3s (88 MB) live in assets/audio. aapt2 leaves .mp3 stored by
+    // default, but say so explicitly: a compressed asset cannot be served with
+    // byte ranges, and <audio> seeking in the WebView depends on that.
+    androidResources {
+        noCompress 'mp3'
     }
 
     compileOptions {

@@ -212,6 +212,392 @@
     }
   }
 
+
+  /* --- recitation audio -------------------------------------------------- */
+  /* 28 recordings bundled in assets/audio: பாயிரம் + one per இயல், 5.2 hours in
+     all, served through the same WebViewAssetLoader origin as the page. They are
+     per-இயல், not per-நூற்பா — no verse timestamps exist — so the player follows
+     the இயல் you are reading and never pretends to know which line is being
+     recited. Durations were measured from the MP3 frames at build time. */
+  var AUDIO = {"payiram":{"f":"002-payiram","d":84,"by":"Prof. M. Vaidyalingan"},"iyal":[[{"f":"003-eluttu-noon-marabu","d":303,"by":"Prof. M. Vaidyalingan"},{"f":"004-eluttu-mozhi-marabu","d":528,"by":"Prof. Pramila Gurumurthy"},{"f":"005-eluttu-pirappiyal","d":265,"by":"Prof. M. Vaidyalingan"},{"f":"006-eluttu-punariyal","d":438},{"f":"007-eluttu-thokai-marabu","d":537},{"f":"008-eluttu-urubiyal","d":365},{"f":"009-eluttu-uyir-mayangiyal","d":827},{"f":"010-eluttu-pulli-mayangiyal","d":872},{"f":"011-eluttu-kutriyalugarap-punariyal","d":929}],[{"f":"012-col-kilaviyakkam","d":647},{"f":"013-col-vetrumaiyiyal","d":434},{"f":"014-col-vetrumai-mayangiyal","d":410},{"f":"015-col-vili-marabu","d":308},{"f":"016-col-peyariyal","d":583},{"f":"017-col-vinaiyiyal","d":659},{"f":"018-col-itaiyiyal","d":544},{"f":"019-col-uriyiyal","d":559},{"f":"020-col-ecchaviyal","d":718}],[{"f":"021-porul-akathinaiyiyal","d":685},{"f":"022-porul-purathinaiyiyal","d":1026},{"f":"023-porul-kalaviyal","d":970},{"f":"024-porul-karpiyal","d":1211},{"f":"025-porul-poruliyal","d":653},{"f":"026-porul-meyppaattiyal","d":378},{"f":"027-porul-uvamaviyal","d":363},{"f":"028-porul-cheyyuliyal","d":2135},{"f":"029-porul-marabiyal","d":1110}]]};
+  var AUDIO_BASE = '../audio/';   /* /assets/www/index.html -> /assets/audio/ */
+  var POS_KEY = 'tk_audio_pos';
+
+  var ap = { el: null, bar: null, cur: null };
+
+  function fmt(sec) {
+    sec = Math.max(0, Math.floor(sec || 0));
+    return Math.floor(sec / 60) + ':' + ('0' + (sec % 60)).slice(-2);
+  }
+
+  /* Which recording belongs to the current view — derived from the hash, the
+     only state the portal exposes (see currentTab). */
+  function audioFor() {
+    var h = window.location.hash || '';
+    if (/^#?p\/payiram$/.test(h)) {
+      return { key: 'payiram', entry: AUDIO.payiram, label: 'சிறப்புப் பாயிரம்' };
+    }
+    var m = /^#?(\d+)\/(\d+)/.exec(h);
+    if (m) {
+      var a = +m[1], i = +m[2];
+      if (AUDIO.iyal[a] && AUDIO.iyal[a][i]) {
+        var h1 = qs('#main .iyal-head h1');
+        var eyebrow = qs('#main .iyal-head .eyebrow');
+        var adhi = eyebrow ? eyebrow.textContent.split('\u00b7')[0].trim() : '';
+        return { key: a + '/' + i, entry: AUDIO.iyal[a][i],
+                 label: (adhi ? adhi + ' \u00b7 ' : '') + (h1 ? h1.textContent.trim() : '') };
+      }
+    }
+    return null;
+  }
+
+  function ensurePlayer() {
+    if (ap.el) { return; }
+    var el = document.createElement('audio');
+    el.preload = 'metadata';
+    el.setAttribute('playsinline', '');
+    ap.el = el;
+
+    var bar = document.createElement('div');
+    bar.className = 'apl';
+    bar.innerHTML =
+      '<button class="apl-play" type="button" aria-label="play">' +
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-play" d="M8 5.5v13l11-6.5z"/>' +
+        '<path class="i-pause" d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></button>' +
+      '<div class="apl-mid"><div class="apl-title"></div>' +
+        '<input class="apl-seek" type="range" min="0" max="1000" value="0" aria-label="seek">' +
+        '<div class="apl-time"><span class="apl-cur">0:00</span><span class="apl-by"></span>' +
+        '<span class="apl-dur">0:00</span></div></div>' +
+      '<button class="apl-mark" type="button">குறி</button>' +
+      '<button class="apl-export" type="button" aria-label="export">ஏற்றுமதி</button>' +
+      '<button class="apl-close" type="button" aria-label="close">\u00d7</button>';
+    bar.appendChild(el);            /* in the DOM: inspectable, and GC-safe */
+    document.body.appendChild(bar);
+    ap.bar = bar;
+
+    bar.querySelector('.apl-mark').addEventListener('click', function () {
+      marking = !marking; updateMarkUi(); decorateCards();
+    });
+    bar.querySelector('.apl-export').addEventListener('click', exportCues);
+    var playBtn = bar.querySelector('.apl-play');
+    var seek = bar.querySelector('.apl-seek');
+    playBtn.addEventListener('click', function () { if (el.paused) { el.play(); } else { el.pause(); } });
+    bar.querySelector('.apl-close').addEventListener('click', function () {
+      el.pause(); el.removeAttribute('src'); el.load(); ap.cur = null; clearLit();
+      marking = false; updateMarkUi();
+      document.documentElement.classList.remove('has-apl'); refreshRows();
+    });
+    var scrubbing = false;
+    seek.addEventListener('input', function () {
+      scrubbing = true;
+      bar.querySelector('.apl-cur').textContent = fmt(seek.value / 1000 * (el.duration || 0));
+    });
+    seek.addEventListener('change', function () {
+      if (el.duration) { el.currentTime = seek.value / 1000 * el.duration; }
+      scrubbing = false;
+    });
+    el.addEventListener('timeupdate', function () {
+      followCues();
+      if (!scrubbing && el.duration) { seek.value = Math.round(el.currentTime / el.duration * 1000); }
+      bar.querySelector('.apl-cur').textContent = fmt(el.currentTime);
+      if (ap.cur && Math.floor(el.currentTime) % 5 === 0) {
+        try { localStorage.setItem(POS_KEY, JSON.stringify({ k: ap.cur, t: el.currentTime })); } catch (e) {}
+      }
+    });
+    el.addEventListener('loadedmetadata', function () {
+      bar.querySelector('.apl-dur').textContent = fmt(el.duration);
+    });
+    ['play', 'pause', 'ended'].forEach(function (ev) {
+      el.addEventListener(ev, function () {
+        bar.classList.toggle('playing', !el.paused && !el.ended);
+        if (el.paused || el.ended) { clearLit(); }
+        refreshRows(); decorateCards();
+      });
+    });
+    /* The portal's own read-aloud (TTS) and this player must never talk over
+       each other: starting either one silences the other. */
+    el.addEventListener('play', function () { if (typeof stopSpeak === 'function') { stopSpeak(); } });
+    document.addEventListener('click', function (e) {
+      if (e.target && e.target.closest && e.target.closest('[data-act="tts"]')) { el.pause(); }
+    }, true);
+
+    if ('mediaSession' in navigator) {
+      try {
+        navigator.mediaSession.setActionHandler('play', function () { el.play(); });
+        navigator.mediaSession.setActionHandler('pause', function () { el.pause(); });
+        navigator.mediaSession.setActionHandler('seekbackward', function () {
+          el.currentTime = Math.max(0, el.currentTime - 15); });
+        navigator.mediaSession.setActionHandler('seekforward', function () {
+          el.currentTime = Math.min(el.duration || 0, el.currentTime + 30); });
+      } catch (e) {}
+    }
+  }
+
+  function loadTrack(info, autoplay) {
+    ensurePlayer();
+    var el = ap.el;
+    if (ap.cur === info.key) {
+      if (autoplay) { if (el.paused) { el.play(); } else { el.pause(); } }
+      return;
+    }
+    ap.cur = info.key;
+    el.src = AUDIO_BASE + info.entry.f + '.mp3';
+    ap.bar.querySelector('.apl-title').textContent = info.label;
+    ap.bar.querySelector('.apl-by').textContent = info.entry.by || '';
+    ap.bar.querySelector('.apl-dur').textContent = fmt(info.entry.d);
+    ap.bar.querySelector('.apl-seek').value = 0;
+    document.documentElement.classList.add('has-apl');
+    try {
+      var saved = JSON.parse(localStorage.getItem(POS_KEY) || 'null');
+      if (saved && saved.k === info.key && saved.t > 5 && saved.t < info.entry.d - 5) {
+        el.addEventListener('loadedmetadata', function once() {
+          el.removeEventListener('loadedmetadata', once);
+          el.currentTime = saved.t;
+        });
+      }
+    } catch (e) {}
+    if ('mediaSession' in navigator) {
+      try {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: info.label, artist: info.entry.by || 'CICT', album: 'தொல்காப்பிய நுண்ணறிவு' });
+      } catch (e) {}
+    }
+    if (autoplay) { var pr = el.play(); if (pr && pr.catch) { pr.catch(function () {}); } }
+    refreshRows();
+  }
+
+  /* The ▶ row on the இயல் / பாயிரம் header. renderIyal() replaces #main
+     wholesale, so this is re-applied from a MutationObserver, not once. */
+  function refreshRows() {
+    var info = audioFor();
+    var old = qs('#main .iyal-audio');
+    if (!info) { if (old) { old.remove(); } return; }
+    var row = old || document.createElement('div');
+    row.className = 'iyal-audio';
+    var isCur = ap.cur === info.key;
+    var playing = isCur && ap.el && !ap.el.paused;
+    row.innerHTML =
+      '<button type="button" class="iyal-audio-btn' + (playing ? ' on' : '') + '">' +
+        (playing ? '\u23f8' : '\u25b6') + ' இயல் ஒலி' +
+        ' <span class="iyal-audio-d">' + fmt(info.entry.d) + '</span></button>' +
+      (info.entry.by ? '<span class="iyal-audio-by">' + info.entry.by + '</span>' : '');
+    row.querySelector('button').onclick = function () { loadTrack(info, true); };
+    if (!old) {
+      var head = qs('#main .iyal-head');
+      var nav = head && head.querySelector('.iyal-nav');
+      if (head && nav) { head.insertBefore(row, nav); }
+      else if (head) { head.appendChild(row); }
+      else {
+        var h1 = qs('#main h1');
+        if (h1 && h1.parentNode) { h1.parentNode.insertBefore(row, h1.nextSibling); }
+      }
+    }
+  }
+
+
+  /* --- நூற்பா highlighting: cue sheets --------------------------------- */
+  /* A cue sheet maps a recording to verse start times:
+       cues[fileStem] = [[mn, seconds], ...]   (mn = the portal's 1-based index)
+     Automatic alignment was tried and rejected: the reciter pauses between அடி
+     as long as between நூற்பா (கிளவியாக்கம்: 61 நூற்பா, 137 அடி, pause counts
+     tracked the lines), so a cumulative guess drifts after one miss. Cues are
+     therefore made by a listener in the app's marking mode and shipped in
+     assets/audio/cues.json; ones marked on this device take effect at once
+     from localStorage. With no cues for a recording, nothing is highlighted —
+     the app never pretends to know which verse is being recited. */
+  var CUES_KEY = 'tk_audio_cues';
+  var cues = {};            /* merged: shipped file, then local marks on top */
+  var marking = false;
+
+  function loadCues() {
+    try {
+      var local = JSON.parse(localStorage.getItem(CUES_KEY) || '{}');
+      for (var k in local) { cues[k] = local[k]; }
+    } catch (e) {}
+    try {
+      fetch(AUDIO_BASE + 'cues.json').then(function (r) { return r.ok ? r.json() : {}; })
+        .then(function (shipped) {
+          for (var k in shipped) { if (!cues[k] || !cues[k].length) { cues[k] = shipped[k]; } }
+        }).catch(function () {});
+    } catch (e) {}
+  }
+
+  function cueList() {
+    if (!ap.cur) { return null; }
+    var info = audioFor();
+    var stem = (info && info.key === ap.cur) ? info.entry.f : null;
+    if (!stem) {
+      /* Playing one இயல் while reading another: no highlight — the cards on
+         screen are not the ones being recited. */
+      return null;
+    }
+    var list = cues[stem];
+    return (list && list.length) ? list.slice().sort(function (a, b) { return a[1] - b[1]; }) : null;
+  }
+
+  function cardFor(mn) {
+    var m = /^#?(\d+)\/(\d+)/.exec(window.location.hash || '');
+    return m ? byId('n-' + m[1] + '-' + m[2] + '-' + mn) : null;
+  }
+
+  var lastLit = null;
+  function clearLit() {
+    if (lastLit) { lastLit.classList.remove('reciting'); lastLit = null; }
+  }
+
+  function followCues() {
+    var list = cueList();
+    if (!list || !ap.el || ap.el.paused) { return; }
+    var t = ap.el.currentTime, mn = null;
+    for (var i = 0; i < list.length; i++) { if (list[i][1] <= t) { mn = list[i][0]; } else { break; } }
+    if (mn === null) { clearLit(); return; }
+    var card = cardFor(mn);
+    if (card === lastLit) { return; }
+    clearLit();
+    if (card) {
+      card.classList.add('reciting'); lastLit = card;
+      var r = card.getBoundingClientRect();
+      if (r.top < 70 || r.bottom > window.innerHeight - 140) {
+        card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    }
+  }
+
+  function seekToCard(mn) {
+    var info = audioFor();
+    if (!info) { return; }
+    var list = cues[info.entry.f];
+    var at = null;
+    if (list) { for (var i = 0; i < list.length; i++) { if (list[i][0] === mn) { at = list[i][1]; } } }
+    loadTrack(info, false);
+    var el = ap.el;
+    var go = function () {
+      if (at !== null) { el.currentTime = at; }
+      var pr = el.play(); if (pr && pr.catch) { pr.catch(function () {}); }
+    };
+    if (el.readyState >= 1) { go(); }
+    else { el.addEventListener('loadedmetadata', function once() { el.removeEventListener('loadedmetadata', once); go(); }); }
+  }
+
+  /* ---- marking mode: the listener builds the cue sheet in the app ---- */
+  function markCard(mn) {
+    var info = audioFor();
+    if (!info || !ap.el || ap.cur !== info.key) { return; }
+    var stem = info.entry.f, t = Math.round(ap.el.currentTime * 10) / 10;
+    var list = (cues[stem] || []).filter(function (c) { return c[0] !== mn; });
+    list.push([mn, t]);
+    list.sort(function (a, b) { return a[0] - b[0]; });
+    cues[stem] = list;
+    try {
+      var local = JSON.parse(localStorage.getItem(CUES_KEY) || '{}');
+      local[stem] = list; localStorage.setItem(CUES_KEY, JSON.stringify(local));
+    } catch (e) {}
+    var card = cardFor(mn);
+    if (card) { card.classList.add('marked'); }
+    updateMarkUi(); decorateCards();
+  }
+
+  function updateMarkUi() {
+    var b = ap.bar && ap.bar.querySelector('.apl-mark');
+    if (!b) { return; }
+    var info = audioFor();
+    var total = 0, done = 0;
+    if (info) {
+      total = document.querySelectorAll('#main .nurpa').length;
+      done = (cues[info.entry.f] || []).length;
+    }
+    b.textContent = marking ? ('குறி ' + done + '/' + total) : 'குறி';
+    b.classList.toggle('on', marking);
+    document.documentElement.classList.toggle('marking', marking);
+  }
+
+  function exportCues() {
+    var local = {};
+    try { local = JSON.parse(localStorage.getItem(CUES_KEY) || '{}'); } catch (e) {}
+    var text = JSON.stringify(local);
+    var title = 'tolkappiyam cues';
+    if (navigator.share) {
+      navigator.share({ title: title, text: text }).catch(function () {});
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text);
+    } else {
+      window.prompt(title, text);
+    }
+  }
+
+  /* ---- per-card ▶ and the TTS highlight ---- */
+  function decorateCards() {
+    var info = audioFor();
+    [].forEach.call(document.querySelectorAll('#main .nurpa'), function (card) {
+      var tools = card.querySelector('.card-tools');
+      if (!tools) { return; }
+      var mn = +card.id.split('-').pop();
+      var btn = tools.querySelector('.rec-btn');
+      if (!info) { if (btn) { btn.remove(); } return; }
+      if (!btn) {
+        btn = document.createElement('button');
+        btn.type = 'button'; btn.className = 'ct-btn rec-btn';
+        btn.setAttribute('aria-label', 'recitation');
+        btn.textContent = '\u25b6';
+        tools.insertBefore(btn, tools.firstChild);
+      }
+      var list = cues[info.entry.f];
+      var has = list && list.some(function (c) { return c[0] === mn; });
+      btn.classList.toggle('cued', !!has);
+      card.classList.toggle('marked', !!has && marking);
+      btn.onclick = function () {
+        if (marking) { markCard(mn); return; }
+        seekToCard(mn);
+      };
+    });
+  }
+
+  function setupHighlight() {
+    loadCues();
+    var main = byId('main');
+    if (main) {
+      var t = null;
+      new MutationObserver(function () { clearTimeout(t); t = setTimeout(function () { decorateCards(); updateMarkUi(); }, 50); })
+        .observe(main, { childList: true });
+    }
+    decorateCards();
+
+    /* Your literal request on the path that works today: when a card's own
+       🔊 read-aloud is speaking, that card is lit. The portal only lights the
+       button (curBtn.on); mirror it onto the card and clear when speech ends. */
+    var ttsCard = null, ttsPoll = null;
+    document.addEventListener('click', function (e) {
+      var b = e.target && e.target.closest && e.target.closest('[data-act="tts"]');
+      if (!b) { return; }
+      var card = b.closest('.nurpa');
+      setTimeout(function () {
+        var on = b.classList.contains('on');
+        if (ttsCard) { ttsCard.classList.remove('reciting'); ttsCard = null; }
+        if (on && card) { ttsCard = card; card.classList.add('reciting'); }
+        clearInterval(ttsPoll);
+        if (on) {
+          ttsPoll = setInterval(function () {
+            if (!b.classList.contains('on') || !(window.speechSynthesis && speechSynthesis.speaking)) {
+              clearInterval(ttsPoll);
+              if (ttsCard) { ttsCard.classList.remove('reciting'); ttsCard = null; }
+            }
+          }, 400);
+        }
+      }, 80);
+    }, false);
+  }
+
+  function setupAudio() {
+    var main = byId('main');
+    if (!main) { return; }
+    var pending = null;
+    new MutationObserver(function () {
+      clearTimeout(pending); pending = setTimeout(refreshRows, 40);
+    }).observe(main, { childList: true });
+    window.addEventListener('hashchange', function () { setTimeout(function () { refreshRows(); decorateCards(); }, 60); });
+    refreshRows();
+  }
+
   function arrange() {
     var mastIn = qs('header.mast .mast-in');
     var side = byId('side');
@@ -309,6 +695,8 @@
     }, true);
 
     buildBottomNav();
+    setupAudio();
+    setupHighlight();
 
     document.documentElement.classList.add('app-chrome-ready');
   }

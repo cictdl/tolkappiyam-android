@@ -425,8 +425,8 @@ footer.foot{background:var(--ink);color:#d8cdaf}
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
-<link rel="stylesheet" href="android.css?v=5">
-<script src="android.js?v=5" defer></script>
+<link rel="stylesheet" href="android.css?v=6">
+<script src="android.js?v=6" defer></script>
 </head>
 <body>
 <header class="mast">
@@ -555,8 +555,7 @@ function renderTree(){
     const cnt=A.i.reduce((s,x)=>s+x.v.length,0);
     box.innerHTML=`<div class="head"><span class="chev">▶</span>
       <span class="anm">${LANG==='ta'?A.n:tr('adh')[ai]}<em>${LANG==='ta'?(EM.adhi[A.n]||{}).n||'':A.n}</em></span><span class="ct">${cnt}</span></div>
-      <div class="iyals">${A.i.map((iy,ii)=>{const e=EM.iyal[iy.n]||{n:'',g:''};return
-        `<div class="iyal${!cur.page&&ai===cur.a&&ii===cur.i?' active':''}" data-a="${ai}" data-i="${ii}" title="${e.n}${e.g?' — '+e.g:''}">
+      <div class="iyals">${A.i.map((iy,ii)=>{const e=EM.iyal[iy.n]||{n:'',g:''};return `<div class="iyal${!cur.page&&ai===cur.a&&ii===cur.i?' active':''}" data-a="${ai}" data-i="${ii}" title="${e.n}${e.g?' — '+e.g:''}">
           <span class="il"><span>${iy.n}</span><em>${e.n}</em></span><span class="n">${iy.v.length}</span></div>`;}).join('')}</div>`;
     box.querySelector('.head').onclick=()=>{go(ai,0);closeSide();};
     box.querySelectorAll('.iyal').forEach(el=>el.onclick=()=>{
