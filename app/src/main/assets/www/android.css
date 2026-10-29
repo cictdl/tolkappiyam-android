@@ -145,3 +145,43 @@ header.mast .search-wrap #search:focus {
 }
 /* The hint duplicates the placeholder and costs a line of a phone screen. */
 header.mast .search-wrap #searchHint { display: none; }
+
+/* ---- 10. bottom navigation --------------------------------------------- */
+/* Fixed app shell. MainActivity already pads the WebView by the system bars,
+   so this sits clear of the gesture bar without needing env() insets. */
+.appnav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 70;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  background: var(--paper-card); border-top: 1px solid var(--line);
+  box-shadow: 0 -2px 12px rgba(20,15,5,.07);
+}
+.appnav button {
+  appearance: none; -webkit-appearance: none; background: none; border: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; min-height: 58px; padding: 7px 2px 8px;
+  font-family: var(--sans); font-size: 11px; line-height: 1.2;
+  /* --tx-faint and plain --ochre measured 3.81:1 and 3.46:1 on the bar, under
+     the 4.5:1 WCAG AA floor for text this small. --tx-soft and --ochre-deep
+     clear it in both themes (the dark palette redefines both). */
+  color: var(--tx-soft); cursor: pointer; position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+.appnav button svg { width: 23px; height: 23px; flex: 0 0 auto; }
+.appnav button span { white-space: nowrap; }
+.appnav button.on { color: var(--ochre-deep); font-weight: 600; }
+/* A 2px rail reads as "you are here" without relying on colour alone. */
+.appnav button.on::before {
+  content: ""; position: absolute; top: 0; left: 22%; right: 22%;
+  height: 2px; background: var(--ochre-deep); border-radius: 0 0 2px 2px;
+}
+.appnav button:active { background: var(--line-soft); }
+.appnav button:focus-visible { outline: 2px solid var(--ochre); outline-offset: -3px; }
+
+/* Keep the last line of the text clear of the bar. */
+html.has-appnav body { padding-bottom: 66px; }
+/* The scroll-to-top button would otherwise sit under the bar. */
+html.has-appnav #toTop { bottom: 76px; }
+
+/* The drawer now carries only the corpus tree and the institutional block, so
+   it no longer needs to be the primary way around the app. */
+html.has-appnav #side { padding-bottom: 66px; }

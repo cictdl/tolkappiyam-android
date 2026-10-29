@@ -65,6 +65,153 @@
   function byId(id) { return document.getElementById(id); }
   function qs(sel) { return document.querySelector(sel); }
 
+
+  /* --- bottom navigation ------------------------------------------------- */
+  /* A drawer is a website pattern. On a phone the four things people actually
+     come for — the text, search, the learning tools and the games — are each a
+     tap away on a fixed bar instead of two taps behind a hamburger. The drawer
+     stays for the corpus tree, which is genuinely hierarchical (3 அதிகாரம் ->
+     27 இயல் -> 1,607 நூற்பா) and belongs in a tree, not a tab.
+
+     Every destination is driven by clicking the portal's own .fitem elements
+     (data-p keys: dir payiram about path test yappu oli games), so this never
+     reimplements navigation — it just reaches the same handlers the sidebar
+     uses, and keeps working if those pages change. */
+  var NAV = [
+    { id: 'read', label: 'படி',
+      icon: '<path d="M12 6.6c-1.6-1.2-3.7-1.9-6.1-1.9H4.4v12h1.5c2.4 0 4.5.7 6.1 1.9 1.6-1.2 3.7-1.9 6.1-1.9h1.5v-12H18.1c-2.4 0-4.5.7-6.1 1.9z"/><path d="M12 6.6v11.9"/>' },
+    { id: 'search', label: 'தேடு',
+      icon: '<circle cx="11" cy="11" r="6"/><path d="M15.6 15.6 20 20"/>' },
+    { id: 'learn', label: 'கற்க', page: 'path',
+      icon: '<path d="M12 4.6 21 8.7l-9 4.1-9-4.1 9-4.1z"/><path d="M7 11.1v4c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5v-4"/>' },
+    { id: 'games', label: 'விளையாட்டு', page: 'games',
+      icon: '<rect x="4.4" y="4.4" width="15.2" height="15.2" rx="3.6"/><circle cx="9" cy="9" r="1.15" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="15" cy="15" r="1.15" fill="currentColor" stroke="none"/>' }
+  ];
+
+  function goPage(key) {
+    var item = qs('.fitem[data-p="' + key + '"]');
+    if (item) { item.click(); return true; }
+    if (typeof renderPage === 'function') { renderPage(key); return true; }
+    return false;
+  }
+
+  /* Search is a mode, not a location: it changes no URL, so it is the one tab
+     that has to be remembered rather than derived. Any real navigation clears it. */
+  var forcedTab = null;
+  /* The portal writes the hash but never listens to it — #a/i[/mn] for the text,
+     #p/<key> for a front-matter page. Returning to the text therefore has to
+     restore the fragment ourselves, or the bar keeps reporting the page we left. */
+  var TEXT_HASH = /^#?\d+\/\d+(\/\d+)?$/;
+  var lastTextHash = null;
+
+  function rememberTextHash() {
+    var h = window.location.hash || '';
+    if (TEXT_HASH.test(h)) { lastTextHash = h.charAt(0) === '#' ? h : '#' + h; }
+  }
+  var LEARN_PAGES = ['path', 'test', 'yappu', 'oli'];
+  /* The portal declares its game keys as `const GAMESET` inside its own script,
+     which is script-scoped and NOT a window property — reading it from here
+     throws ReferenceError, and a typeof guard just fails silently (the Games tab
+     never lit up). Function declarations like renderPage/renderIyal/closeSide ARE
+     global and are still called directly; only the const has to be mirrored.
+     Keep in step with GAMESET in index.html. */
+  var GAME_PAGES = ['games', 'game', 'sandhi', 'sort', 'chain', 'thinai',
+                    'pairs', 'wordle', 'urubu', 'iyal', 'meyp'];
+
+  function currentTab() {
+    if (forcedTab) { return forcedTab; }
+    /* The portal records front-matter pages in the hash as #p/<key> and the text
+       as #<adhikaram>/<iyal>. cur.page stays null throughout, so the hash — not
+       cur — is the source of truth for which tab is current. */
+    var m = /^#?p\/(.+)$/.exec(window.location.hash || '');
+    if (m) {
+      var k = m[1];
+      if (GAME_PAGES.indexOf(k) >= 0) { return 'games'; }
+      if (LEARN_PAGES.indexOf(k) >= 0) { return 'learn'; }
+    }
+    return 'read';
+  }
+
+  function syncNav() {
+    var bar = qs('.appnav');
+    if (!bar) { return; }
+    var active = currentTab();
+    [].forEach.call(bar.children, function (b) {
+      b.classList.toggle('on', b.dataset.nav === active);
+      b.setAttribute('aria-current', b.dataset.nav === active ? 'page' : 'false');
+    });
+  }
+
+  function buildBottomNav() {
+    if (qs('.appnav')) { return; }
+    var bar = document.createElement('nav');
+    bar.className = 'appnav';
+    bar.setAttribute('role', 'navigation');
+
+    NAV.forEach(function (n) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.dataset.nav = n.id;
+      b.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" ' +
+        'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + n.icon + '</svg>' +
+        '<span>' + n.label + '</span>';
+      b.addEventListener('click', function () {
+        if (typeof closeSide === 'function') { closeSide(); }
+        if (n.id === 'search') {
+          forcedTab = 'search';
+          var si = byId('search');
+          if (si) { window.scrollTo(0, 0); si.focus(); si.select(); }
+          syncNav();
+          return;
+        }
+        forcedTab = null;
+        if (n.id === 'read') {
+          /* Leave whatever front-matter page is open and return to the text.
+             replaceState rather than assigning location.hash: no extra history
+             entry, and nothing in the portal is listening for the change. */
+          try {
+            history.replaceState(null, '',
+              lastTextHash || (location.pathname + location.search));
+          } catch (e) { /* a stale fragment is survivable; a crash is not */ }
+          if (typeof renderTree === 'function') { renderTree(); }
+          if (typeof renderIyal === 'function') { renderIyal(); }
+          window.scrollTo(0, 0);
+        } else {
+          goPage(n.page);
+        }
+        document.documentElement.classList.add('nav-started');
+        syncNav();
+      });
+      bar.appendChild(b);
+    });
+
+    document.body.appendChild(bar);
+    rememberTextHash();
+    document.documentElement.classList.add('has-appnav');
+    syncNav();
+    /* The sidebar and in-page links change the page without going through the
+       bar, so re-derive the active tab after any navigation. */
+    document.addEventListener('click', function (e) {
+      if (e.target && e.target.closest && !e.target.closest('.appnav, .search-wrap')) {
+        forcedTab = null;
+      }
+      setTimeout(function () { rememberTextHash(); syncNav(); }, 60);
+    }, true);
+    window.addEventListener('hashchange', function () {
+      forcedTab = null; rememberTextHash(); setTimeout(syncNav, 60);
+    });
+    /* Typing keeps you in search; clearing the box hands the tab back to the text. */
+    var sIn = byId('search');
+    if (sIn) {
+      sIn.addEventListener('focus', function () { forcedTab = 'search'; syncNav(); });
+      sIn.addEventListener('input', function () {
+        forcedTab = sIn.value.trim().length ? 'search' : null;
+        syncNav();
+      });
+    }
+  }
+
   function arrange() {
     var mastIn = qs('header.mast .mast-in');
     var side = byId('side');
@@ -160,6 +307,8 @@
         document.documentElement.classList.add('nav-started');
       }
     }, true);
+
+    buildBottomNav();
 
     document.documentElement.classList.add('app-chrome-ready');
   }
